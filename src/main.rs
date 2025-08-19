@@ -5,8 +5,8 @@ use std::time::Duration;
 const SCREEN_WIDTH: u32 = 1200;
 const SCREEN_HEIGHT: u32 = 800;
 
-const SPREAD: f32 = 1.1;
-const LENGTH_CHANGE: f32 = 0.7;
+const SPREAD: f32 = 1.6;
+const LENGTH_CHANGE: f32 = 0.6;
 
 struct LineSegment {
     start_point: Point,
@@ -31,7 +31,7 @@ mod tests {
             0,
         );
 
-        let (next_left, _next_right) = start_line.calculate_next_lines();
+        let (next_left, _next_middle, _next_right) = start_line.calculate_next_lines();
 
         assert_eq!(next_left.start_point, Point::new(400, 450));
         assert_eq!(next_left.end_point, Point::new(393, 421));
@@ -85,13 +85,14 @@ fn main() -> Result<(), String> {
         for line in &current_line_segments {
             _ = canvas.draw_line(line.start_point, line.end_point);
 
-            let (new_line_left, new_line_right) = line.calculate_next_lines();
+            let (new_line_left, new_line_middle, new_line_right) = line.calculate_next_lines();
             // line.print();
             // new_line_left.print();
             // new_line_right.print();
 
-            if new_line_left.length > 0.0 || new_line_right.length > 0.0 {
+            if new_line_left.length > 0.0 || new_line_middle.length > 0.0 || new_line_right.length > 0.0 {
                 next_line_segments.push(new_line_left);
+                next_line_segments.push(new_line_middle);
                 next_line_segments.push(new_line_right);
             }
         }
@@ -148,7 +149,7 @@ impl LineSegment {
         }
     }
 
-    fn calculate_next_lines(&self) -> (Self, Self) {
+    fn calculate_next_lines(&self) -> (Self, Self, Self) {
 
         let start_x = self.end_point.x;
         let start_y = self.end_point.y;
@@ -159,6 +160,17 @@ impl LineSegment {
             start_y - (self.length * LENGTH_CHANGE * (self.inclination() + self.angle / SPREAD).sin()) as i32,
             self.angle / SPREAD,
             self.depth + 1,
+        );
+
+        let middle_line_segment = Self::new(
+            start_x,
+            start_y,
+            start_x + (self.length * LENGTH_CHANGE * self.inclination().cos()) as i32,
+            start_y - (self.length * LENGTH_CHANGE * self.inclination().sin()) as i32,
+            self.angle / SPREAD,
+            self.depth + 1,
+
+
         );
 
         // println!("inside calculate_next_lines");
@@ -183,6 +195,6 @@ impl LineSegment {
         //     (self.angle - self.angle / 2.0).sin()
         // );
 
-        return (left_line_segment, right_line_segment);
+        return (left_line_segment, middle_line_segment, right_line_segment);
     }
 }
