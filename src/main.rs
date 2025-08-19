@@ -1,11 +1,12 @@
-extern crate sdl2;
-
 use sdl2::{event::Event, keyboard::Keycode, pixels::Color, rect::Point};
 use core::f32::consts::PI;
 use std::time::Duration;
 
 const SCREEN_WIDTH: u32 = 1200;
 const SCREEN_HEIGHT: u32 = 800;
+
+const SPREAD: f32 = 1.1;
+const LENGTH_CHANGE: f32 = 0.7;
 
 struct LineSegment {
     start_point: Point,
@@ -148,14 +149,14 @@ impl LineSegment {
     }
 
     fn calculate_next_lines(&self) -> (Self, Self) {
-        const SPREAD: f32 = 1.1;
+
         let start_x = self.end_point.x;
         let start_y = self.end_point.y;
         let left_line_segment = Self::new(
             start_x,
             start_y,
-            start_x + (self.length * 0.7 * (self.inclination() + self.angle / SPREAD).cos()) as i32,
-            start_y - (self.length * 0.7 * (self.inclination() + self.angle / SPREAD).sin()) as i32,
+            start_x + (self.length * LENGTH_CHANGE * (self.inclination() + self.angle / SPREAD).cos()) as i32,
+            start_y - (self.length * LENGTH_CHANGE * (self.inclination() + self.angle / SPREAD).sin()) as i32,
             self.angle / SPREAD,
             self.depth + 1,
         );
@@ -170,8 +171,8 @@ impl LineSegment {
         let right_line_segment = LineSegment::new(
             start_x,
             start_y,
-            start_x + (self.length * 0.7 * (self.inclination() - self.angle / SPREAD).cos()) as i32,
-            start_y - (self.length * 0.7 * (self.inclination() - self.angle / SPREAD).sin()) as i32,
+            start_x + (self.length * LENGTH_CHANGE * (self.inclination() - self.angle / SPREAD).cos()) as i32,
+            start_y - (self.length * LENGTH_CHANGE * (self.inclination() - self.angle / SPREAD).sin()) as i32,
             self.angle / SPREAD,
             self.depth + 1,
         );
